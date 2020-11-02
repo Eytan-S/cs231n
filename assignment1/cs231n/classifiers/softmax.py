@@ -33,9 +33,24 @@ def softmax_loss_naive(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+    num_train = X.shape[0]
+    num_classes = W.shape[1]
+    f = X.dot(W)
+    f -= np.max(f)
+    for i in range(0, num_train):
+      loss -= np.log(np.exp(f[i][y[i]])/np.sum(np.exp(f[i])))
+      for j in range(0, num_classes):
+        dW[:,j] += X[i] * np.exp(f[i][j])/np.sum(np.exp(f[i]))
+      dW[:,y[i]] -= X[i]
+      
+    loss /= num_train
+    dW /= num_train
+    loss += reg * np.sum(W*W)
+    dW += reg * 2 * W
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+
 
     return loss, dW
 
@@ -57,6 +72,25 @@ def softmax_loss_vectorized(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+
+    num_train = X.shape[0]
+    num_classes = W.shape[1]
+    f = X.dot(W)
+    f -= np.max(f)
+
+    y_scores = f[np.arange(y.shape[0]), y]
+    loss = np.sum(-np.log( np.exp(y_scores) / np.sum(np.exp(f),axis=1)))
+
+    # partial derivative for dL/dWi is (S-1)Xi for i/=j, SXi for i=j
+    S = np.exp(f)/np.sum(np.exp(f),axis=1)[:,np.newaxis]
+    S[np.arange(y.shape[0]), y] -= 1
+    dW = X.T.dot(S)
+
+
+    loss /= num_train
+    dW /= num_train
+    loss += reg * np.sum(W*W)
+    dW += reg * 2 * W
 
     pass
 

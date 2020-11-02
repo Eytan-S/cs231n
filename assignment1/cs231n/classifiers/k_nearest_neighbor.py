@@ -101,8 +101,8 @@ class KNearestNeighbor(object):
             #######################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            dists[i,:] = X
-
+            dists[i,:] = np.sqrt(np.sum(np.square(X[i] - self.X_train),axis=1))
+            
             pass
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -132,6 +132,11 @@ class KNearestNeighbor(object):
         #       and two broadcast sums.                                         #
         #########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+
+        train_squares = np.sum(np.square(self.X_train), axis=1)
+        test_squares = np.sum(np.square(X), axis=1)
+        dot_product = X.dot(self.X_train.T)
+        dists = np.sqrt(train_squares - 2*dot_product + test_squares[:,np.newaxis])
 
         pass
 
