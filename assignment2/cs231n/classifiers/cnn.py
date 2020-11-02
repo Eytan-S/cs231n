@@ -62,6 +62,15 @@ class ThreeLayerConvNet(object):
         # the start of the loss() function to see how that happens.                #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        C, H, W = input_dim
+
+        self.params['b1'] = np.zeros((1,num_filters))
+        self.params['b2'] = np.zeros((1,hidden_dim))
+        self.params['b3'] = np.zeros((1,num_classes))
+        self.params['W1'] = np.random.normal(0, weight_scale, size=(num_filters, C, filter_size, filter_size))
+        self.params['W2'] = np.random.normal(0, weight_scale, size=(num_filters*H//2*W//2, hidden_dim))
+        self.params['W3'] = np.random.normal(0, weight_scale, size=(hidden_dim, num_classes))
+
 
         pass
 
@@ -102,6 +111,11 @@ class ThreeLayerConvNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+        conv_out, conv_cache = conv_relu_pool_forward(X, W1, b1, conv_param, pool_param)
+        affine_relu_out, affine_relu_cache = affine_relu_forward(conv_out, W2, b2)
+        scores, affine_cache = affine_forward(affine_relu_out, W3, b3)
+
+
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -124,6 +138,18 @@ class ThreeLayerConvNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        
+        loss, dout = softmax_loss(scores, y)
+        dh2, grads['W3'], grads['b3'] = affine_backward(dout, affine_cache)
+        dh1, grads['W2'], grads['b2'] = affine_relu_backward(dh2, affine_relu_cache)
+        dx, grads['W1'], grads['b1'] = conv_relu_pool_backward(dh1, conv_cache)
+
+        reg = self.reg
+        loss += 0.5 * reg * (np.sum(W1**2) + np.sum(W2**2) + np.sum(W3*2))
+        grads['W3'] += reg * W3
+        grads['W2'] += reg * W2
+        grads['W1'] += reg * W1
+
 
         pass
 
